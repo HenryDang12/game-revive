@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>REVIVE - Bù nước bù khoáng</title>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&display=swap');
+
+    :root {
+      --blue: #00BFFF;
+      --cyan: #00E5FF;
+      --white: #FFFFFF;
+      --bg: #031522;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: "Montserrat", Arial, sans-serif;
+      background: var(--bg);
+      color: white;
+    }
+
+    .game-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background:
+        radial-gradient(
+          circle at 50% 42%,
+          rgba(0, 191, 255, 0.12) 0%,
+          rgba(0, 191, 255, 0.03) 30%,
+          transparent 60%
+        ),
+        linear-gradient(180deg, #061522 0%, #020b12 100%);
+    }
+
+    /* System Screens Setup */
+    .page {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      transform: scale(0.96);
+      z-index: 1;
+    }
+
+    .page.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+      z-index: 2;
+    }
+
+    /* Common Buttons */
+    .btn {
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      min-width: 260px;
+      height: 65px;
+      padding: 0 35px;
+      border-radius: 50px;
+      background: var(--blue);
+      color: #031522;
+      font-size: 20px;
+      box-shadow:
+        0 0 12px var(--blue),
+        0 0 30px rgba(0,191,255,.5);
+      transition: all .15s ease;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow:
+        0 0 20px var(--blue),
+        0 0 45px rgba(0,191,255,.8);
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--white);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      box-shadow: none;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    }
+
+    /* Header Brand */
+    .brand {
+      position: absolute;
+      top: 4vh;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      z-index: 5;
+    }
+
+    .brand-name {
+      font-size: clamp(32px, 5vw, 60px);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      color: var(--blue);
+      text-shadow: 0 0 10px rgba(0,191,255,.8);
+    }
+
+    /* TRANG 1: WELCOME SCREEN */
+    .kv-image {
+      max-width: 85%;
+      max-height: 45vh;
+      object-fit: contain;
+      border-radius: 20px;
+      margin-bottom: 30px;
+      filter: drop-shadow(0 0 20px rgba(0, 191, 255, 0.3));
+    }
+
+    .welcome-title {
+      font-size: clamp(22px, 3.5vw, 40px);
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 25px;
+      color: var(--white);
+      text-shadow: 0 0 15px rgba(255,255,255,0.3);
+    }
+
+    /* TRANG 2: GAME SCREEN & COUNTDOWN */
+    .countdown-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(3, 21, 34, 0.88);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      backdrop-filter: blur(5px);
+    }
+
+    .countdown-number {
+      font-size: clamp(80px, 20vw, 180px);
+      font-weight: 900;
+      color: var(--blue);
+      text-shadow: 0 0 30px var(--blue), 0 0 60px var(--cyan);
+      animation: popZoom 0.8s ease infinite;
+    }
+
+    @keyframes popZoom {
+      0% { transform: scale(0.5); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); opacity: 0; }
+    }
+
+    .headline {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .headline h1 {
+      font-size: clamp(22px, 3vw, 42px);
+      font-weight: 800;
+    }
+
+    .headline p {
+      margin-top: 8px;
+      font-size: clamp(13px, 1.5vw, 18px);
+      color: rgba(255,255,255,.65);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .words {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: clamp(10px, 2vw, 25px);
+      width: min(1000px, 90vw);
+    }
+
+    .word {
+      position: relative;
+      height: clamp(110px, 15vw, 190px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid rgba(255,255,255,.18);
+      border-radius: 20px;
+      color: rgba(255,255,255,.2);
+      background: rgba(255,255,255,.015);
+      font-size: clamp(22px, 3.5vw, 55px);
+      font-weight: 900;
+      transition: all 0.08s ease;
+    }
+
+    .word.on {
+      color: var(--blue);
+      border-color: var(--blue);
+      background: radial-gradient(circle, rgba(0,191,255,.2), transparent);
+      box-shadow: 0 0 15px rgba(0,191,255,.8);
+      text-shadow: 0 0 15px var(--blue);
+      transform: scale(1.02);
+    }
+
+    .controls {
+      margin-top: 35px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .instruction {
+      color: rgba(255,255,255,.5);
+      font-size: 13px;
+    }
+
+    /* POPUP THUA GAME */
+    .popup-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(3, 21, 34, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .popup-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .popup-box {
+      background: linear-gradient(145deg, #092032, #051421);
+      border: 2px solid rgba(0, 191, 255, 0.4);
+      box-shadow: 0 0 30px rgba(0, 191, 255, 0.25);
+      border-radius: 24px;
+      padding: 40px 30px;
+      width: min(420px, 85vw);
+      text-align: center;
+      transform: translateY(20px);
+      transition: transform 0.3s ease;
+    }
+
+    .popup-overlay.active .popup-box {
+      transform: translateY(0);
+    }
+
+    .popup-title {
+      font-size: 26px;
+      font-weight: 900;
+      color: #FF5252;
+      text-shadow: 0 0 10px rgba(255, 82, 82, 0.5);
+      margin-bottom: 12px;
+    }
+
+    .popup-desc {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 30px;
+      line-height: 1.4;
+    }
+
+    .popup-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* TRANG 3: WIN SCREEN */
+    .win-box {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .win-title {
+      font-size: clamp(28px, 5vw, 52px);
+      color: var(--blue);
+      text-shadow: 0 0 20px var(--blue);
+      margin-bottom: 20px;
+    }
+
+    .flash {
+      position: absolute;
+      inset: 0;
+      background: var(--blue);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    .flash.active {
+      animation: flashAnim .5s ease-out;
+    }
+
+    @keyframes flashAnim {
+      0% { opacity: .3; }
+      100% { opacity: 0; }
+    }
+
+    @media (max-width: 700px) {
+      .words { grid-template-columns: repeat(2, 1fr); }
+      .word { height: 100px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    <div class="flash" id="flash"></div>
+
+    <div class="brand">
+      <div class="brand-name">REVIVE</div>
+    </div>
+
+    <!-- TRANG 1: BẮT ĐẦU -->
+    <div class="page active" id="page1">
+      <img src="https://i.imgur.com/8Q9S8Xj.png" alt="Revive Key Visual" class="kv-image" />
+      <div class="welcome-title">THỬ THÁCH BÙ NƯỚC BÙ KHOÁNG</div>
+      <button class="btn" id="btnStartGame">BẮT ĐẦU</button>
+    </div>
+
+    <!-- TRANG 2: GAMEPLAY -->
+    <div class="page" id="page2">
+      <!-- Countdown Overlay -->
+      <div class="countdown-overlay" id="countdownOverlay" style="display: none;">
+        <div class="countdown-number" id="countdownNumber">3</div>
+      </div>
+
+      <div class="headline">
+        <h1>BÙ NƯỚC BÙ KHOÁNG</h1>
+        <p>Dừng đúng lúc để bật sáng tất cả</p>
+      </div>
+
+      <div class="words" id="words">
+        <div class="word" data-index="0">BÙ</div>
+        <div class="word" data-index="1">NƯỚC</div>
+        <div class="word" data-index="2">BÙ</div>
+        <div class="word" data-index="3">KHOÁNG</div>
+      </div>
+
+      <div class="controls">
+        <button class="btn" id="btnStop">DỪNG</button>
+        <div class="instruction">Bấm DỪNG hoặc dùng phím SPACE khi cả 4 chữ cùng sáng</div>
+      </div>
+
+      <!-- POPUP KHI THUA -->
+      <div class="popup-overlay" id="losePopup">
+        <div class="popup-box">
+          <div class="popup-title">CHƯA CHÍNH XÁC!</div>
+          <div class="popup-desc">Bạn chưa dừng đúng lúc cả 4 chữ cùng bật sáng. Hãy thử lại nhé!</div>
+          <div class="popup-actions">
+            <button class="btn" id="btnRetry">CHƠI LẠI</button>
+            <button class="btn btn-secondary" id="btnHome">VỀ TRANG CHỦ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANG 3: CHIẾN THẮNG -->
+    <div class="page" id="page3">
+      <div class="win-box">
+        <h2 class="win-title">🎉 XIN CHÚC MỪNG!</h2>
+        <img src="https://i.imgur.com/8Q9S8Xj.png" alt="Revive Win KV" class="kv-image" />
+        <button class="btn" id="btnRestart">CHƠI LẠI</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Elements
+    const page1 = document.getElementById("page1");
+    const page2 = document.getElementById("page2");
+    const page3 = document.getElementById("page3");
+
+    const btnStartGame = document.getElementById("btnStartGame");
+    const btnStop = document.getElementById("btnStop");
+    const btnRestart = document.getElementById("btnRestart");
+
+    const losePopup = document.getElementById("losePopup");
+    const btnRetry = document.getElementById("btnRetry");
+    const btnHome = document.getElementById("btnHome");
+
+    const countdownOverlay = document.getElementById("countdownOverlay");
+    const countdownNumber = document.getElementById("countdownNumber");
+    const flash = document.getElementById("flash");
+
+    const wordElements = [
+      document.querySelector('[data-index="0"]'),
+      document.querySelector('[data-index="1"]'),
+      document.querySelector('[data-index="2"]'),
+      document.querySelector('[data-index="3"]')
+    ];
+
+    // Variables
+    let playing = false;
+    let timer = null;
+    const SPEED = 110;
+    let states = [false, false, false, false];
+
+    // Navigation Logic
+    function goToPage(page) {
+      losePopup.classList.remove("active");
+      [page1, page2, page3].forEach(p => p.classList.remove("active"));
+      page.classList.add("active");
+    }
+
+    // Render lights state
+    function render() {
+      wordElements.forEach((el, index) => {
+        el.classList.toggle("on", states[index]);
+      });
+    }
+
+    function randomizeLights() {
+      const shouldCreateAllOn = Math.random() < 0.04;
+
+      if (shouldCreateAllOn) {
+        states = [true, true, true, true];
+      } else {
+        states = states.map(() => Math.random() > 0.48);
+        if (!states.some(Boolean)) {
+          states[Math.floor(Math.random() * 4)] = true;
+        }
+      }
+      render();
+    }
+
+    // Countdown 3 2 1 GO
+    function startCountdown(callback) {
+      countdownOverlay.style.display = "flex";
+      let count = 3;
+      countdownNumber.textContent = count;
+
+      const interval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          countdownNumber.textContent = count;
+        } else if (count === 0) {
+          countdownNumber.textContent = "GO!";
+        } else {
+          clearInterval(interval);
+          countdownOverlay.style.display = "none";
+          callback();
+        }
+      }, 800);
+    }
+
+    // Start Game Loop
+    function runGameLoop() {
+      playing = true;
+      states = [false, false, false, false];
+      render();
+
+      clearInterval(timer);
+      timer = setInterval(randomizeLights, SPEED);
+    }
+
+    // Stop & Check
+    function handleStop() {
+      if (!playing) return;
+      playing = false;
+      clearInterval(timer);
+
+      const win = states.every(Boolean);
+
+      if (win) {
+        // Flash Anim
+        flash.classList.remove("active");
+        void flash.offsetWidth;
+        flash.classList.add("active");
+
+        setTimeout(() => {
+          goToPage(page3);
+        }, 400);
+      } else {
+        // Hiện Popup Thua
+        losePopup.classList.add("active");
+      }
+    }
+
+    // Event Listeners
+    btnStartGame.addEventListener("click", () => {
+      goToPage(page2);
+      startCountdown(runGameLoop);
+    });
+
+    btnStop.addEventListener("click", handleStop);
+
+    // Popup Handlers
+    btnRetry.addEventListener("click", () => {
+      losePopup.classList.remove("active");
+      startCountdown(runGameLoop);
+    });
+
+    btnHome.addEventListener("click", () => {
+      goToPage(page1);
+    });
+
+    btnRestart.addEventListener("click", () => {
+      goToPage(page1);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.code === "Space" && page2.classList.contains("active") && !losePopup.classList.contains("active")) {
+        event.preventDefault();
+        handleStop();
+      }
+    });
+  </script>
+</body>
+</html>
