@@ -58,6 +58,7 @@
       transition: opacity 0.4s ease, transform 0.4s ease;
       transform: scale(0.96);
       z-index: 1;
+      padding: 20px;
     }
 
     .page.active {
@@ -132,10 +133,10 @@
     /* TRANG 1: WELCOME SCREEN */
     .kv-image {
       max-width: 85%;
-      max-height: 45vh;
+      max-height: 40vh;
       object-fit: contain;
       border-radius: 20px;
-      margin-bottom: 30px;
+      margin-bottom: 25px;
       filter: drop-shadow(0 0 20px rgba(0, 191, 255, 0.3));
     }
 
@@ -148,7 +149,66 @@
       text-shadow: 0 0 15px rgba(255,255,255,0.3);
     }
 
-    /* TRANG 2: GAME SCREEN & COUNTDOWN */
+    /* TRANG THỂ LỆ (MỚI) */
+    .rules-card {
+      background: linear-gradient(145deg, rgba(9, 32, 50, 0.9), rgba(5, 20, 33, 0.9));
+      border: 2px solid rgba(0, 191, 255, 0.4);
+      box-shadow: 0 0 30px rgba(0, 191, 255, 0.2);
+      border-radius: 24px;
+      padding: 30px 25px;
+      width: min(500px, 90vw);
+      max-height: 65vh;
+      overflow-y: auto;
+      text-align: left;
+      margin-top: 40px;
+      margin-bottom: 25px;
+    }
+
+    .rules-title {
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 900;
+      color: var(--blue);
+      text-align: center;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
+    }
+
+    .rules-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .rules-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: clamp(14px, 1.8vw, 16px);
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .rules-badge {
+      background: var(--blue);
+      color: #031522;
+      font-weight: 900;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 14px;
+    }
+
+    .gift-highlight {
+      color: var(--cyan);
+      font-weight: 800;
+    }
+
+    /* TRANG GAMEPLAY & COUNTDOWN */
     .countdown-overlay {
       position: absolute;
       inset: 0;
@@ -305,7 +365,14 @@
       font-size: clamp(28px, 5vw, 52px);
       color: var(--blue);
       text-shadow: 0 0 20px var(--blue);
+      margin-bottom: 10px;
+    }
+
+    .win-subtitle {
+      font-size: clamp(16px, 2.5vw, 22px);
+      color: var(--cyan);
       margin-bottom: 20px;
+      font-weight: 700;
     }
 
     .flash {
@@ -348,7 +415,29 @@
       <button class="btn" id="btnStartGame">BẮT ĐẦU</button>
     </div>
 
-    <!-- TRANG 2: GAMEPLAY -->
+    <!-- TRANG 2: THỂ LỆ CHƯƠNG TRÌNH (MỚI) -->
+    <div class="page" id="pageRules">
+      <div class="rules-card">
+        <h2 class="rules-title">THỂ LỆ CHƯƠNG TRÌNH</h2>
+        <ul class="rules-list">
+          <li class="rules-item">
+            <span class="rules-badge">1</span>
+            <div>Quan sát 4 ô chữ <b>BÙ - NƯỚC - BÙ - KHOÁNG</b> chớp tắt liên tục.</div>
+          </li>
+          <li class="rules-item">
+            <span class="rules-badge">2</span>
+            <div>Bấm nút <b>DỪNG</b> đúng thời điểm cả 4 ô chữ cùng phát sáng.</div>
+          </li>
+          <li class="rules-item">
+            <span class="rules-badge">3</span>
+            <div>Chiến thắng thử thách để nhận ngay <span class="gift-highlight">1 Voucher Revive miễn phí</span> và cơ hội trúng quà cực hấp dẫn!</div>
+          </li>
+        </ul>
+      </div>
+      <button class="btn" id="btnPlayNow">THAM GIA NGAY</button>
+    </div>
+
+    <!-- TRANG 3: GAMEPLAY -->
     <div class="page" id="page2">
       <!-- Countdown Overlay -->
       <div class="countdown-overlay" id="countdownOverlay" style="display: none;">
@@ -385,10 +474,11 @@
       </div>
     </div>
 
-    <!-- TRANG 3: CHIẾN THẮNG -->
+    <!-- TRANG 4: CHIẾN THẮNG & NHẬN QUÀ -->
     <div class="page" id="page3">
       <div class="win-box">
         <h2 class="win-title">🎉 XIN CHÚC MỪNG!</h2>
+        <div class="win-subtitle">Bạn đã nhận được 1 phần quà từ Revive!</div>
         <img src="https://i.imgur.com/8Q9S8Xj.png" alt="Revive Win KV" class="kv-image" />
         <button class="btn" id="btnRestart">CHƠI LẠI</button>
       </div>
@@ -398,10 +488,12 @@
   <script>
     // Elements
     const page1 = document.getElementById("page1");
+    const pageRules = document.getElementById("pageRules");
     const page2 = document.getElementById("page2");
     const page3 = document.getElementById("page3");
 
     const btnStartGame = document.getElementById("btnStartGame");
+    const btnPlayNow = document.getElementById("btnPlayNow");
     const btnStop = document.getElementById("btnStop");
     const btnRestart = document.getElementById("btnRestart");
 
@@ -429,7 +521,7 @@
     // Navigation Logic
     function goToPage(page) {
       losePopup.classList.remove("active");
-      [page1, page2, page3].forEach(p => p.classList.remove("active"));
+      [page1, pageRules, page2, page3].forEach(p => p.classList.remove("active"));
       page.classList.add("active");
     }
 
@@ -509,7 +601,11 @@
 
     // Event Listeners
     btnStartGame.addEventListener("click", () => {
-      goToPage(page2);
+      goToPage(pageRules); // Chuyển sang Trang Thể Lệ
+    });
+
+    btnPlayNow.addEventListener("click", () => {
+      goToPage(page2); // Chuyển sang Trang Gameplay
       startCountdown(runGameLoop);
     });
 
